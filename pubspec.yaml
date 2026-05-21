@@ -1,0 +1,29 @@
+name: callreminder
+description: A new Flutter project for call reminders.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # የFirebase መሠረታዊ ፓኬጆች
+  firebase_core: ^3.0.0
+  cloud_firestore: ^5.0.0
+  # የስልክ ጥሪ እና ፈቃድ ፓኬጆች (በስልክ ላይ ሲጫን የሚሰሩ)
+  permission_handler: ^11.3.1
+  call_log: ^5.0.0
+  # ኤስኤምኤስ በቀጥታ ከብሮውዘር ለመላክ የሚያስፈልግ
+  http: ^1.2.1
+  # የዲዛይን ማሳመሪያ
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
