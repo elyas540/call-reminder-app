@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,8 +9,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 // የማሳወቂያ መቆጣጠሪያ ማዕከል
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+    
 
-// በጀርባ (Background) በየጊዜው የሚሠራው ዋናው ሥራ
+// 1. የፋየርቤዝ በጀርባ (Background) መልዕክት መቀበያ ፈንክሽን
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("በጀርባ የመጣ የፋየርቤዝ ኖቲፊኬሽን ID: ${message.messageId}");
+  
+  // ከፋየርቤዝ የመጣውን መልዕክት በስልኩ ማሳወቂያ ላይ እንዲታይ ማድረግ
+  if (message.notification != null) {
+    // እዚህ ላይ showNotification መጠቀም ይቻላል
+  }
+}
+
+// 2. የዎርክ ማናጀር (Workmanager) በጀርባ በየጊዜው የሚሠራው ዋናው ሥራ
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -73,6 +88,10 @@ Future<void> showNotification(String title, String body) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 3. ፋየርቤዝን ማስጀመር እና የጀርባ መልዕክት መቀበያውን ማገናኘት
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   // የማሳወቂያ ቅንብሮችን ማስጀመር
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -120,6 +139,16 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     checkContactsAndNotify();
+    
+    // አፑ ክፍት እያለ የፋየርቤዝ ኖቲፊኬሽን ሲመጣ ለመቀበል (Foreground)
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        showNotification(
+          message.notification!.title ?? "የጥሪ ማስታወሻ",
+          message.notification!.body ?? "",
+        );
+      }
+    });
   }
 
   @override
